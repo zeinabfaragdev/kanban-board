@@ -3,13 +3,14 @@ const saveItemBtns = document.querySelectorAll(".solid");
 const addItemContainers = document.querySelectorAll(".add-container");
 const addItems = document.querySelectorAll(".add-item");
 // Item Lists
-const itemLists = document.querySelectorAll(".drag-item-list");
+const listColumns = document.querySelectorAll(".drag-item-list");
 const backlogList = document.getElementById("backlog-list");
 const progressList = document.getElementById("progress-list");
 const completeList = document.getElementById("complete-list");
 const onHoldList = document.getElementById("on-hold-list");
 
 // Items
+let updatedOnLoad = false;
 
 // Initialize Arrays
 let backlogListArray = [];
@@ -19,6 +20,8 @@ let onHoldListArray = [];
 let listArrays = [];
 
 // Drag Functionality
+let draggedItem;
+let currentColumn;
 
 // Get Arrays from localStorage if available, set default values if not
 function getSavedColumns() {
@@ -33,41 +36,68 @@ function getSavedColumns() {
     completeListArray = ["Being cool", "Getting stuff done"];
     onHoldListArray = ["Being uncool"];
   }
-}
-
-getSavedColumns();
-updateSavedColumns();
-// Set localStorage Arrays
-function updateSavedColumns() {
   listArrays = [
     backlogListArray,
     progressListArray,
     completeListArray,
     onHoldListArray,
   ];
+}
+
+// Set localStorage Arrays
+function updateSavedColumns() {
   const arrayNames = ["backlog", "progress", "complete", "onHold"];
-  arrayNames.forEach((arrayName, i) => {
-    localStorage.setItem(`${arrayName}Items`, JSON.stringify(listArrays[i]));
+  listArrays.forEach((array, i) => {
+    localStorage.setItem(`${arrayNames[i]}Items`, JSON.stringify(array));
   });
 }
 
 // Create DOM Elements for each list item
 function createItemEl(columnEl, column, item, index) {
-  console.log("columnEl:", columnEl);
-  console.log("column:", column);
-  console.log("item:", item);
-  console.log("index:", index);
   // List Item
   const listEl = document.createElement("li");
   listEl.classList.add("drag-item");
+  listEl.textContent = item;
+  listEl.draggable = true;
+  listEl.setAttribute("ondragstart", "drag(event)");
+  columnEl.appendChild(listEl);
 }
 
 // Update Columns in DOM - Reset HTML, Filter Array, Update localStorage
 function updateDOM() {
   // Check localStorage once
-  // Backlog Column
-  // Progress Column
-  // Complete Column
-  // On Hold Column
-  // Run getSavedColumns only once, Update Local Storage
+  if (!updatedOnLoad) {
+    getSavedColumns();
+  }
+
+  listColumns.forEach((column, i) => {
+    listArrays[i].forEach((item, j) => {
+      createItemEl(column, i, item, j);
+    });
+  });
 }
+
+function drag(e) {
+  draggedItem = e.target;
+}
+
+function dragEnter(col) {
+  listColumns[col].classList.add("over");
+  currentColumn = col;
+}
+
+function allowDrop(e) {
+  e.preventDefault();
+}
+
+function drop(e) {
+  e.preventDefault();
+  listColumns.forEach((col) => {
+    col.classList.remove("over");
+  });
+
+  const parent = listColumns[currentColumn];
+  parent.appendChild(draggedItem);
+}
+
+updateDOM();
