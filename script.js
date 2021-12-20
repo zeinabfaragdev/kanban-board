@@ -126,6 +126,10 @@ function allowDrop(e) {
   e.preventDefault();
 }
 
+function dragLeave(col) {
+  listColumns[col].classList.remove("over");
+}
+
 function drop(e) {
   e.preventDefault();
   listColumns.forEach((col) => {
