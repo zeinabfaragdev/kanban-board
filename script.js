@@ -104,11 +104,10 @@ function hideInputBox(col) {
 }
 
 function rebuildArrays() {
-  listArrays = [[], [], [], []];
   listColumns.forEach((column, i) => {
-    for (let j = 0; j < column.children.length; j++) {
-      listArrays[i].push(column.children[j].textContent);
-    }
+    listArrays[i] = Array.from(column.children).map(
+      (child) => child.textContent
+    );
   });
   updateDOM();
 }
